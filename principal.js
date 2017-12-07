@@ -51,10 +51,13 @@ var mainState = {
         enemigos.x = 20;
         enemigos.y = 30;
 
-        var anima = game.add.tween(enemigos).to({x:70}, 1000, Phaser.Easing.Linear.None, true, 0, 1000, true).onLoop.add(descender, this);
+        tween = game.add.tween(enemigos);
+        tween.to({ x: [20, 50, 20, 50, 20], y: [250, 150, 150, 30]}, 3000, "Linear");
     },
 
     update() {
+        tween.start();
+        fondo.tilePosition.y -= 1;
         if (cursors.right.isDown) {
             nave.position.x += 3;
         } else if (cursors.left.isDown) {
