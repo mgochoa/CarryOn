@@ -6,7 +6,9 @@ var nave;
 var cursors;
 
 var balas;
+var balasEnemigas;
 var tiempoBala = 0;
+var tiempoBalaEnemiga = 0;
 var btnDisparo;
 
 var enemigos;
@@ -15,6 +17,7 @@ var mainState = {
     preload() {
         game.load.image('personaje', 'assets/space/NaveAlpha.png');
         game.load.image('fondo', 'assets/space/space.png');
+        game.load.image('balaEnemiga', 'assets/space/laser2.png');
         game.load.image('bala', 'assets/space/laser.png');
 
         game.load.spritesheet('enemigo', 'assets/space/NaveRaso.png',143, 132);
@@ -27,6 +30,16 @@ var mainState = {
         nave.anchor.setTo(0.5);
 
         cursors = game.input.keyboard.createCursorKeys();
+
+        balasEnemigas = game.add.group();
+        balasEnemigas.enableBody = true;
+        balasEnemigas.physicsBodyType = Phaser.Physics.ARCADE;
+        balasEnemigas.createMultiple(20, 'balaEnemiga');
+        balasEnemigas.setAll('anchor.x', 0.5);
+        balasEnemigas.setAll('anchor.y', 1);
+
+        balasEnemigas.setAll('outOfBoundsKill', true);
+        balasEnemigas.setAll('checkWorldBounds', true);
 
         balas = game.add.group();
         balas.enableBody = true;
@@ -52,7 +65,7 @@ var mainState = {
         enemigos.y = 30;
 
         tween = game.add.tween(enemigos);
-        tween.to({ x: [20, 50, 20, 50, 20], y: [250, 150, 150, 30]}, 3000, "Linear");
+        tween.to({ x: [20, 50, 20, 50, 20], y: [280, 150, 150, 30]}, 3000, "Linear");
     },
 
     update() {
@@ -64,6 +77,7 @@ var mainState = {
             nave.position.x -= 3;
         }
         var bala;
+        var balaEne;
         if (cursors.up.isDown) {
 
             if (game.time.now > tiempoBala) {
@@ -76,17 +90,25 @@ var mainState = {
                 tiempoBala = game.time.now + 100;
             }
         }
+        var unEnemigo;
+        if (game.time.now > tiempoBala) {
+            balaEne = balasEnemigas.getFirstExists(false);
+            unEnemigo = enemigos.getRandomExists();
+        }
+
+        if (balaEne) {
+            balaEne.reset(unEnemigo.x, unEnemigo.y);
+            balaEne.body.velocity.y = 100;
+            tiempoBala = game.time.now + 100;
+        }
 
         game.physics.arcade.overlap(balas, enemigos, colision, null, this);
     }
 };
-function colision(bala, enemigo) {
-    bala.kill();
-    enemigo.kill();
-}
 
-function descender() {
-    enemigos.y += 10;
+function colision(bala, nave) {
+    bala.kill();
+    nave.kill();
 }
 
 game.state.add('main', mainState);
